@@ -1,8 +1,9 @@
 package sandbox
 
-import cats.instances.string._
-import cats.syntax.semigroup._
+import cats.effect.{ExitCode, IO, IOApp}
 
-object Main extends App {
-  println("Hello " |+| "Cats!")
+object Main extends IOApp {
+  override def run(args: List[String]): IO[ExitCode] = {
+    TicTacToe.run(args)
+  }
 }

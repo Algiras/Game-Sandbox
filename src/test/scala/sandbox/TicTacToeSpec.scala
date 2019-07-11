@@ -5,6 +5,11 @@ import cats.Show
 import org.specs2.mutable.Specification
 import cats.syntax.show._
 import org.specs2.specification.core.Fragments
+import sandbox.TicTacToe.coordinates.{Col1, Col2, Col3, Coordinates, Row1, Row2, Row3}
+import sandbox.TicTacToe.game.{Game, Move, Row}
+import sandbox.TicTacToe.game
+import sandbox.TicTacToe.game.Row._
+import sandbox.TicTacToe.typeClasses.Read
 
 class TicTacToeSpec extends Specification {
   "Read" >> {
@@ -39,8 +44,8 @@ class TicTacToeSpec extends Specification {
       Row(None,    None,    None   ).show must_=== ". . ."
     }
 
-    "show game" >> {
-      game(
+    "show currentGame" >> {
+      buildGame(
         "X X .",
         "O O O",
         ". . X"
@@ -52,9 +57,9 @@ class TicTacToeSpec extends Specification {
 
     }
 
-    "show game on console" >> {
+    "show currentGame on console" >> {
       displayGameOnConsole(
-        game(
+        buildGame(
           "X X .",
           "O O O",
           ". . X"
@@ -82,23 +87,23 @@ class TicTacToeSpec extends Specification {
     }
   }
 
-  "Playing the game" >> {
-    "produce new game state after getting state and move" >> {
-      import Coordinates._
+  "Playing the currentGame" >> {
+    "produce new currentGame state after getting state and move" >> {
+      import coordinates._
 
-      Game.empty + Move(X, A1) must beSome(game(
+      game.empty + Move(X, A1) must beSome(buildGame(
         "X . .",
         ". . .",
         ". . ."
       ))
 
-      Game.empty + Move(X, B1) must beSome(game(
+      game.empty + Move(X, B1) must beSome(buildGame(
         ". X .",
         ". . .",
         ". . ."
       ))
 
-      Game.empty + Move(X, C1) must beSome(game(
+      game.empty + Move(X, C1) must beSome(buildGame(
         ". . X",
         ". . .",
         ". . ."
@@ -106,19 +111,19 @@ class TicTacToeSpec extends Specification {
 
       // ---------------------------------------
 
-      Game.empty + Move(X, A2) must beSome(game(
+      game.empty + Move(X, A2) must beSome(buildGame(
         ". . .",
         "X . .",
         ". . ."
       ))
 
-      Game.empty + Move(X, B2) must beSome(game(
+      game.empty + Move(X, B2) must beSome(buildGame(
         ". . .",
         ". X .",
         ". . ."
       ))
 
-      Game.empty + Move(X, C2) must beSome(game(
+      game.empty + Move(X, C2) must beSome(buildGame(
         ". . .",
         ". . X",
         ". . ."
@@ -126,29 +131,29 @@ class TicTacToeSpec extends Specification {
 
       // ---------------------------------------
 
-      Game.empty + Move(X, A3) must beSome(game(
+      game.empty + Move(X, A3) must beSome(buildGame(
         ". . .",
         ". . .",
         "X . ."
       ))
 
-      Game.empty + Move(X, B3) must beSome(game(
+      game.empty + Move(X, B3) must beSome(buildGame(
         ". . .",
         ". . .",
         ". X ."
       ))
 
-      Game.empty + Move(X, C3) must beSome(game(
+      game.empty + Move(X, C3) must beSome(buildGame(
         ". . .",
         ". . .",
         ". . X"
       ))
     }
 
-    "return None if game state is not valid" >> {
-      import Coordinates._
+    "return None if currentGame state is not valid" >> {
+      import coordinates._
 
-      game(
+      buildGame(
         ". . .",
         ". . .",
         ". . X"
@@ -156,9 +161,9 @@ class TicTacToeSpec extends Specification {
     }
 
     "tell if board is full" >> {
-      import Coordinates._
+      import coordinates._
 
-      val currentGame = game(
+      val currentGame = buildGame(
         "O . O",
         "X X O",
         "X O X"
@@ -171,47 +176,47 @@ class TicTacToeSpec extends Specification {
 
     "check if anyone win" >> {
       val wins: Seq[(Game, Option[Square])] = Seq(
-        (game(
+        (buildGame(
         "O . O",
         "X X O",
         "X O X"
         ), None),
-        (game(
+        (buildGame(
           "O O O",
           "X X .",
           "X O X"
         ), Some(O)),
-        (game(
+        (buildGame(
           "O . O",
           "X X X",
           "O O X"
         ), Some(X)),
-        (game(
+        (buildGame(
           "O . O",
           "X O O",
           "X X X"
         ), Some(X)),
-        (game(
+        (buildGame(
           "X . O",
           "X X O",
           "X O O"
         ), Some(X)),
-        (game(
+        (buildGame(
           "O X .",
           "X X O",
           "O X X"
         ), Some(X)),
-        (game(
+        (buildGame(
           "O . O",
           "X X O",
           "X X O"
         ), Some(O)),
-        (game(
+        (buildGame(
           "O . X",
           "X X O",
           "X O O"
         ), Some(X)),
-        (game(
+        (buildGame(
           "X . O",
           "X X O",
           "O O X"
@@ -224,7 +229,7 @@ class TicTacToeSpec extends Specification {
     }
   }
 
-  private def game(row1: String, row2: String, row3: String): Game = Read[Game].read(Seq(
+  private def buildGame(row1: String, row2: String, row3: String): Game = Read[Game].read(Seq(
     row1,
     row2,
     row3
