@@ -34,32 +34,35 @@ package object TicTacToe {
     ).mkString("\n")
   }
 
-  def run[F[_]: Monad](implicit console: Console[F]): F[ExitCode] = {
+  def run[F[_]: Monad](implicit console: Console[F], applicative: Applicative[F]): F[ExitCode] = {
+    import console._
+    import applicative._
 
-    def retry[T](readValue: F[Option[T]]): F[T] = for {
-      element <- readValue
-      getOrRetry <- if(element.isDefined) Applicative[F].pure(element.get) else console.printLine(Text.invalidChoice) *> retry(readValue)
-    } yield getOrRetry
+    def retry[T](readValue: F[Option[T]]): F[T] = readValue.flatMap { element =>
+      if(element.isDefined) pure(element.get) else printLine(Text.invalidChoice) *> retry(readValue)
+    }
 
     def readGame(square: Square, game: Game): F[Game] = for {
-      _ <- console.printLine(displayGameOnConsole(game))
-      _ <- console.printLine(Text.nextMove(square))
-      _ <- console.printLine(Text.validInputs)
-      nextStage <- retry(console.readLine.map(Decoder[Coordinates].decode).map(cord => cord.flatMap(coordinates => game + Move(square, coordinates))))
+      _ <- printLine(displayGameOnConsole(game))
+      _ <- printLine(Text.nextMove(square))
+      _ <- printLine(Text.validInputs)
+      nextStage <- retry(readLine.map(Decoder[Coordinates].decode).map(_.flatMap(coordinates => game + Move(square, coordinates))))
     } yield nextStage
 
-    def gameLoop(square: Square, game: Game): F[Option[Square]] = for {
-      currentGame <- readGame(square, game)
-      nextGame <- if(currentGame.full) Applicative[F].pure(None: Option[Square]) else if(currentGame.winner.isDefined) Applicative[F].pure(currentGame.winner) else gameLoop(Square.opposite(square), currentGame)
-    } yield nextGame
-
-    lazy val readSquare: F[Square] = retry(console.readLine.map(Decoder[Square].decode))
+    def gameLoop(square: Square, game: Game): F[Option[Square]] = readGame(square, game).flatMap{ currentGame =>
+      if(currentGame.full)
+        pure(None: Option[Square])
+      else if(currentGame.winner.isDefined)
+        pure(currentGame.winner)
+      else
+        gameLoop(Square.opposite(square), currentGame)
+    }
 
     for {
-      _ <- console.printLine(Text.chooseText(X))
-      square <- readSquare
+      _ <- printLine(Text.chooseText(X))
+      square <- retry(readLine.map(Decoder[Square].decode))
       result <- gameLoop(square, game.empty)
-      _ <- console.printLine(result.map(Text.winner).getOrElse(Text.draw))
+      _ <- printLine(result.map(Text.winner).getOrElse(Text.draw))
     } yield ExitCode.Success
   }
 }

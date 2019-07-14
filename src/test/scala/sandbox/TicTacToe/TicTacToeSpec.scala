@@ -27,55 +27,53 @@ class TicTacToeSpec extends Specification {
   }
 
   "Playing a winning game" >> {
-    def move(square: Square, moves: Move*) = Seq(
-      displayGameOnConsole(gameMoves(moves).get),
-      Text.nextMove(square),
-      Text.validInputs
-    )
-
     run[TestState].run(TestCase(
       Seq("X", "A1", "A1", "B1", "A2", "B2", "A3"),
       Seq(Text.chooseText(X))
-        ++ move(X)
-        ++ move(O, Move(X, A1))
+        ++ nextMoveDisplay(X)
+        ++ nextMoveDisplay(O, Move(X, A1))
         ++ Seq(Text.invalidChoice)
-        ++ move(X, Move(X, A1), Move(O, B1))
-        ++ move(O, Move(X, A1), Move(O, B1), Move(X, A2))
-        ++ move(X, Move(X, A1), Move(O, B1), Move(X, A2), Move(O, B2))
-        ++ Seq(Text.winner(X))
-      )
-    ) must beRight((TestCase(Seq.empty, Seq.empty), ExitCode.Success))
+        ++ nextMoveDisplay(X, Move(X, A1), Move(O, B1))
+        ++ nextMoveDisplay(O, Move(X, A1), Move(O, B1), Move(X, A2))
+        ++ nextMoveDisplay(X, Move(X, A1), Move(O, B1), Move(X, A2), Move(O, B2))
+        ++ Seq(Text.winner(X)))
+    ) must beRight(completedProgram)
   }
 
-  "Playing a winning game" >> {
-    def move(square: Square, moves: Move*) = Seq(
-      displayGameOnConsole(gameMoves(moves).get),
-      Text.nextMove(square),
-      Text.validInputs
-    )
-
+  "Playing a draw game" >> {
     run[TestState].run(TestCase(
-      Seq("X", "A1", "B1", "A2", "B2", "A3"),
+      Seq("X", "A1", "A2", "B1", "B2", "C2", "C1", "A3", "B3", "C3"),
       Seq(Text.chooseText(X))
-        ++ move(X)
-        ++ move(O, Move(X, A1))
-        ++ move(X, Move(X, A1), Move(O, B1))
-        ++ move(O, Move(X, A1), Move(O, B1), Move(X, A2))
-        ++ move(X, Move(X, A1), Move(O, B1), Move(X, A2), Move(O, B2))
-        ++ Seq(Text.winner(X))
-    )
-    ) must beRight((TestCase(Seq.empty, Seq.empty), ExitCode.Success))
+        ++ nextMoveDisplay(X)
+        ++ nextMoveDisplay(O, Move(X, A1))
+        ++ nextMoveDisplay(X, Move(X, A1), Move(O, A2))
+        ++ nextMoveDisplay(O, Move(X, A1), Move(O, A2), Move(X, B1))
+        ++ nextMoveDisplay(X, Move(X, A1), Move(O, A2), Move(X, B1), Move(O, B2))
+        ++ nextMoveDisplay(O, Move(X, A1), Move(O, A2), Move(X, B1), Move(O, B2), Move(X, C2))
+        ++ nextMoveDisplay(X, Move(X, A1), Move(O, A2), Move(X, B1), Move(O, B2), Move(X, C2), Move(O, C1))
+        ++ nextMoveDisplay(O, Move(X, A1), Move(O, A2), Move(X, B1), Move(O, B2), Move(X, C2), Move(O, C1), Move(X, A3))
+        ++ nextMoveDisplay(X, Move(X, A1), Move(O, A2), Move(X, B1), Move(O, B2), Move(X, C2), Move(O, C1), Move(X, A3), Move(O, B3))
+        ++ Seq(Text.draw))
+    ) must beRight(completedProgram)
   }
 
   def gameMoves(moves: Seq[Move]): Option[Game] = {
-    moves.foldLeft(Option(game.empty)){ case (cGame, move) => cGame.flatMap(_ + move)}
+    moves.foldLeft(Option(game.empty)) { case (cGame, move) => cGame.flatMap(_ + move) }
   }
+
+  def nextMoveDisplay(square: Square, moves: Move*) = Seq(
+    displayGameOnConsole(gameMoves(moves).get),
+    Text.nextMove(square),
+    Text.validInputs
+  )
+
+  val completedProgram = (TestCase(Seq.empty, Seq.empty), ExitCode.Success)
 
   case class TestCase(inputs: Seq[String], outputs: Seq[String])
 
   type TestState[A] = StateT[Either[String, ?], TestCase, A]
 
-  def tesState[A](fn: TestCase => Either[String, (TestCase, A)]) = StateT[Either[String, ?], TestCase, A](fn)
+  def tesState[A](fn: TestCase => Either[String, (TestCase, A)]): StateT[Either[String, ?], TestCase, A] = StateT[Either[String, ?], TestCase, A](fn)
 
   implicit val stateInstance: Console[TestState] = new Console[TestState] {
     override def readLine: TestState[String] = tesState(state => {
