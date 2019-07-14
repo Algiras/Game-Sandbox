@@ -1,30 +1,43 @@
 package sandbox.TicTacToe
 
-import cats.Show
-import sandbox.TicTacToe.typeClasses.Read
+import sandbox.TicTacToe.typeClasses.{Decoder, Encoder}
+import sandbox.TicTacToe.typeClasses.Encoder._
 
-sealed trait Square
+sealed trait Square {
+  val symbol: Char
 
-object X extends Square
-object O extends Square
+  def asSquare: Square = this
+}
+
+object X extends Square {
+  override val symbol: Char = 'X'
+}
+object O extends Square {
+  override val symbol: Char = 'O'
+}
 
 object Square {
+  val empty = '.'
 
   def opposite(value: Square): Square = value match {
     case X => O
     case O => X
   }
 
-  implicit val showSquare: Show[Square] = {
-    case X => "X"
-    case O => "O"
-  }
+  implicit val showSquare: Encoder[Square] = (value: Square) => value.symbol.toString
 
-  implicit val readSquare: Read[Square] = (value: String) => value.headOption.flatMap {
-    case 'X' => Some(X)
-    case 'O' => Some(O)
+  implicit val readSquare: Decoder[Square] = (value: String) => value.headOption.flatMap {
+    case X.symbol => Some(X)
+    case O.symbol => Some(O)
     case _ => None
   }
 
+  implicit val squareOptEncoder: Encoder[Option[Square]] = (t: Option[Square]) => t.map(_.encode).getOrElse(empty.toString)
 
+  implicit val squareOptDecoder: Decoder[Option[Square]] = (value: String) => {
+    value.headOption.flatMap {
+      case X.symbol | O.symbol | Square.empty => Some(Decoder[Square].decode(value))
+      case _ => None
+    }
+  }
 }
