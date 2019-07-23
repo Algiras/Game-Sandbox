@@ -7,12 +7,12 @@ import sandbox.TicTacToe.Square._
 import sandbox.TicTacToe.typeClasses.Encoder._
 import sandbox.TicTacToe.typeClasses.{Decoder, Encoder}
 
-case class Row(col1: Option[Square], col2: Option[Square], col3: Option[Square]) {
-  val full: Boolean = col1.isDefined && col2.isDefined && col3.isDefined
-}
+case class Row(col1: Option[Square], col2: Option[Square], col3: Option[Square])
 
 object Row {
   def apply(col1: Option[Square], col2: Option[Square], col3: Option[Square]): Row = new Row(col1, col2, col3)
+
+  def full(row: Row): Boolean = Seq(row.col1, row.col2, row.col3).forall(_.isDefined)
 
   implicit val rowEncoder: Encoder[Row] = (t: Row) => Seq(t.col1, t.col2, t.col3).map(_.encode).mkString(" ")
   implicit val rowDecoder: Decoder[Row] = (value: String) => if (value.length == 5) {

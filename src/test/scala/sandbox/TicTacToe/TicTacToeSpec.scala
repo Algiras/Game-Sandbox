@@ -5,7 +5,7 @@ import cats.effect.ExitCode
 import cats.instances.either._
 import cats.syntax.either._
 import org.specs2.mutable.Specification
-import sandbox.TicTacToe.coordinates.CoordinatesSpec._
+import sandbox.TicTacToe.coordinates.CoordinateSpec._
 import sandbox.TicTacToe.game.GameSpec.buildGameUnsafe
 import sandbox.TicTacToe.game.{Game, Move}
 import sandbox.TicTacToe.typeClasses.Console
@@ -58,7 +58,7 @@ class TicTacToeSpec extends Specification {
   }
 
   def gameMoves(moves: Seq[Move]): Option[Game] = {
-    moves.foldLeft(Option(game.empty)) { case (cGame, move) => cGame.flatMap(_ + move) }
+    moves.foldLeft(Option(game.empty)) { case (cGame, move) => cGame.flatMap(game.move(_, move)) }
   }
 
   def nextMoveDisplay(square: Square, moves: Move*) = Seq(

@@ -3,7 +3,7 @@ package sandbox.TicTacToe.game
 import cats.data.NonEmptyList
 import org.specs2.mutable.Specification
 import org.specs2.specification.core.Fragments
-import sandbox.TicTacToe.coordinates.CoordinatesSpec._
+import sandbox.TicTacToe.coordinates.CoordinateSpec._
 import sandbox.TicTacToe.typeClasses.{Decoder, encoderDecoderParity}
 import sandbox.TicTacToe.{O, Square, X, game}
 import GameSpec._
@@ -23,19 +23,19 @@ class GameSpec extends Specification {
   }
 
   "Making a move" >> {
-    game.empty + Move(X, A1) must beSome(buildGameUnsafe(
+    game.move(game.empty, Move(X, A1)) must beSome(buildGameUnsafe(
       "X . .",
       ". . .",
       ". . ."
     ))
 
-    game.empty + Move(X, B1) must beSome(buildGameUnsafe(
+    game.move(game.empty, Move(X, B1)) must beSome(buildGameUnsafe(
       ". X .",
       ". . .",
       ". . ."
     ))
 
-    game.empty + Move(X, C1) must beSome(buildGameUnsafe(
+    game.move(game.empty, Move(X, C1)) must beSome(buildGameUnsafe(
       ". . X",
       ". . .",
       ". . ."
@@ -43,19 +43,19 @@ class GameSpec extends Specification {
 
     // ---------------------------------------
 
-    game.empty + Move(X, A2) must beSome(buildGameUnsafe(
+    game.move(game.empty, Move(X, A2)) must beSome(buildGameUnsafe(
       ". . .",
       "X . .",
       ". . ."
     ))
 
-    game.empty + Move(X, B2) must beSome(buildGameUnsafe(
+    game.move(game.empty, Move(X, B2)) must beSome(buildGameUnsafe(
       ". . .",
       ". X .",
       ". . ."
     ))
 
-    game.empty + Move(X, C2) must beSome(buildGameUnsafe(
+    game.move(game.empty, Move(X, C2)) must beSome(buildGameUnsafe(
       ". . .",
       ". . X",
       ". . ."
@@ -63,19 +63,19 @@ class GameSpec extends Specification {
 
     // ---------------------------------------
 
-    game.empty + Move(X, A3) must beSome(buildGameUnsafe(
+    game.move(game.empty, Move(X, A3)) must beSome(buildGameUnsafe(
       ". . .",
       ". . .",
       "X . ."
     ))
 
-    game.empty + Move(X, B3) must beSome(buildGameUnsafe(
+    game.move(game.empty, Move(X, B3)) must beSome(buildGameUnsafe(
       ". . .",
       ". . .",
       ". X ."
     ))
 
-    game.empty + Move(X, C3) must beSome(buildGameUnsafe(
+    game.move(game.empty, Move(X, C3)) must beSome(buildGameUnsafe(
       ". . .",
       ". . .",
       ". . X"
@@ -132,7 +132,7 @@ class GameSpec extends Specification {
     )
 
     Fragments.foreach(wins){
-      case (game, winner) => game.winner must_=== winner
+      case (currentGame, winner) => game.winner(currentGame) must_=== winner
     }
   }
 
@@ -144,17 +144,17 @@ class GameSpec extends Specification {
       "X O X"
     )
 
-    currentGame.full must beFalse
+    game.full(currentGame) must beFalse
 
-    (currentGame + Move(X, B1)).map(_.full) must beSome(true)
+    game.move(currentGame, Move(X, B1)).map(game.full) must beSome(true)
   }
 
   "return None if game state after a move is not valid" >> {
-    buildGameUnsafe(
+    game.move(buildGameUnsafe(
       ". . .",
       ". . .",
       ". . X"
-    ) + Move(X, C3) must beNone
+    ), Move(X, C3)) must beNone
   }
 }
 

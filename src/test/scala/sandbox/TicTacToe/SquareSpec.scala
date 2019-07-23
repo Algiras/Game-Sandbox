@@ -9,7 +9,7 @@ class SquareSpec extends Specification {
   "Encoding/Decoder" >> {
     encoderDecoderParity[Square](NonEmptyList.fromListUnsafe(
       List(X, O).zip(
-      List(X, O).map(_.symbol.toString))
+      List(X, O).map(Square.toSymbol(_).toString))
     ))
   }
 
@@ -18,7 +18,7 @@ class SquareSpec extends Specification {
 
     encoderDecoderParity[Option[Square]](NonEmptyList.fromListUnsafe(
       List(None,        Option(X),  Option(O)).zip(
-           empty +: List(X,         O        ).map(_.symbol.toString))
+           empty +: List(X,         O        ).map(Square.toSymbol(_).toString))
     ))
   }
 

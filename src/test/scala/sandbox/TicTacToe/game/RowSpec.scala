@@ -22,9 +22,9 @@ class RowSpec extends Specification {
   }
 
   "full" >> {
-    Row(None,    None,    None).full must beFalse
-    Row(Some(X), None,    None).full must beFalse
-    Row(Some(X), Some(X), None).full must beFalse
-    Row(Some(X), Some(X), Some(X)).full must beTrue
+    Row.full(Row(None, None, None)) must beFalse
+    Row.full(Row(Some(X), None, None)) must beFalse
+    Row.full(Row(Some(X), Some(X), None)) must beFalse
+    Row.full(Row(Some(X), Some(X), Some(X))) must beTrue
   }
 }
