@@ -1,4 +1,4 @@
-package sandbox.TicTacToe.typeClasses
+package sandbox.typeClasses
 
 trait Decoder[T] {
   def decode(value: String): Option[T]

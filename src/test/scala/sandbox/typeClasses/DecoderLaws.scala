@@ -1,4 +1,4 @@
-package sandbox.TicTacToe.typeClasses
+package sandbox.typeClasses
 
 import org.specs2.matcher.MatchResult
 

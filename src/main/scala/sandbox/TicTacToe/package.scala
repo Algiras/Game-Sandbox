@@ -9,8 +9,8 @@ import cats.{Applicative, Monad}
 import sandbox.TicTacToe.coordinates.{Col1, Col2, Col3, ColumnCoordinate, Coordinate, Row1, Row2, Row3, RowCoordinate}
 import sandbox.TicTacToe.game.Row._
 import sandbox.TicTacToe.game.{Game, Move, Row}
-import sandbox.TicTacToe.typeClasses.Encoder._
-import sandbox.TicTacToe.typeClasses.{Console, Decoder}
+import sandbox.typeClasses.Encoder._
+import sandbox.typeClasses.{Console, Decoder}
 
 package object TicTacToe {
 

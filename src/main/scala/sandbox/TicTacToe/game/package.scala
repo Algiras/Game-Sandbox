@@ -1,8 +1,8 @@
 package sandbox.TicTacToe
 
 import cats.Applicative
-import sandbox.TicTacToe.typeClasses.{Decoder, Encoder}
-import sandbox.TicTacToe.typeClasses.Encoder._
+import sandbox.typeClasses.{Decoder, Encoder}
+import sandbox.typeClasses.Encoder._
 import cats.instances.option._
 import cats.syntax.semigroupk._
 import sandbox.TicTacToe.coordinates.{Col1, Col2, Col3, Coordinate, Row1, Row2, Row3}

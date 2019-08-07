@@ -2,7 +2,7 @@ package sandbox.TicTacToe.coordinates
 
 import cats.data.NonEmptyList
 import org.specs2.mutable.Specification
-import sandbox.TicTacToe.typeClasses._
+import sandbox.typeClasses._
 import CoordinateSpec._
 
 class CoordinateSpec extends Specification{

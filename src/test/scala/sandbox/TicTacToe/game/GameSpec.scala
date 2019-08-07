@@ -4,7 +4,7 @@ import cats.data.NonEmptyList
 import org.specs2.mutable.Specification
 import org.specs2.specification.core.Fragments
 import sandbox.TicTacToe.coordinates.CoordinateSpec._
-import sandbox.TicTacToe.typeClasses.{Decoder, encoderDecoderParity}
+import sandbox.typeClasses.{Decoder, encoderDecoderParity}
 import sandbox.TicTacToe.{O, Square, X, game}
 import GameSpec._
 

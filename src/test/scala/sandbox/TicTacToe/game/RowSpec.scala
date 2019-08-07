@@ -2,7 +2,7 @@ package sandbox.TicTacToe.game
 
 import cats.data.NonEmptyList
 import org.specs2.mutable.Specification
-import sandbox.TicTacToe.typeClasses.encoderDecoderParity
+import sandbox.typeClasses.encoderDecoderParity
 import sandbox.TicTacToe.{O, X}
 
 class RowSpec extends Specification {

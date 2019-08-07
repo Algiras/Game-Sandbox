@@ -1,6 +1,6 @@
 package sandbox.TicTacToe.coordinates
 
-import sandbox.TicTacToe.typeClasses.{Decoder, Encoder}
+import sandbox.typeClasses.{Decoder, Encoder}
 
 sealed trait ColumnCoordinate
 

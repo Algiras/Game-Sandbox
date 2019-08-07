@@ -4,8 +4,8 @@ import cats.Applicative
 import cats.instances.option._
 import sandbox.TicTacToe.Square
 import sandbox.TicTacToe.Square._
-import sandbox.TicTacToe.typeClasses.Encoder._
-import sandbox.TicTacToe.typeClasses.{Decoder, Encoder}
+import sandbox.typeClasses.Encoder._
+import sandbox.typeClasses.{Decoder, Encoder}
 
 case class Row(col1: Option[Square], col2: Option[Square], col3: Option[Square])
 

@@ -1,4 +1,4 @@
-package sandbox.TicTacToe
+package sandbox
 
 import cats.data.NonEmptyList
 import org.specs2.matcher.MatchResult

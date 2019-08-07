@@ -1,4 +1,4 @@
-package sandbox.TicTacToe.typeClasses
+package sandbox.typeClasses
 
 trait Encoder[T] {
   def encode(value: T): String

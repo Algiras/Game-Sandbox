@@ -1,7 +1,7 @@
 package sandbox.TicTacToe
 
-import sandbox.TicTacToe.typeClasses.{Decoder, Encoder}
-import sandbox.TicTacToe.typeClasses.Encoder._
+import sandbox.typeClasses.{Decoder, Encoder}
+import sandbox.typeClasses.Encoder._
 
 sealed trait Square {
   def asSquare: Square = this

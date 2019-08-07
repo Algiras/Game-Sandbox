@@ -3,7 +3,7 @@ package sandbox.TicTacToe
 import cats.data.NonEmptyList
 import org.specs2.mutable.Specification
 import sandbox.TicTacToe.Square._
-import sandbox.TicTacToe.typeClasses.encoderDecoderParity
+import sandbox.typeClasses.encoderDecoderParity
 
 class SquareSpec extends Specification {
   "Encoding/Decoder" >> {

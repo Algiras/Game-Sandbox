@@ -8,7 +8,7 @@ import org.specs2.mutable.Specification
 import sandbox.TicTacToe.coordinates.CoordinateSpec._
 import sandbox.TicTacToe.game.GameSpec.buildGameUnsafe
 import sandbox.TicTacToe.game.{Game, Move}
-import sandbox.TicTacToe.typeClasses.Console
+import sandbox.typeClasses.Console
 
 class TicTacToeSpec extends Specification {
   "Display Game in Console format" >> {

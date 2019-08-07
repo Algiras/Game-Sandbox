@@ -2,8 +2,8 @@ package sandbox.TicTacToe
 
 import cats.Applicative
 import cats.instances.option._
-import sandbox.TicTacToe.typeClasses.{Decoder, Encoder}
-import sandbox.TicTacToe.typeClasses.Encoder._
+import sandbox.typeClasses.{Decoder, Encoder}
+import sandbox.typeClasses.Encoder._
 
 package object coordinates {
   val combinations: List[Coordinate] = for {
