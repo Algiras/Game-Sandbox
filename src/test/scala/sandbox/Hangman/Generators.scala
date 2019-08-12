@@ -1,32 +1,38 @@
 package sandbox.Hangman
 
-import cats.data.{Ior, NonEmptyList, NonEmptySet}
-import org.scalacheck.{Arbitrary, Gen}
-import org.scalacheck.Gen.const
+import cats.data.{NonEmptyList, NonEmptySet}
 import cats.instances.char._
-import State.{symbolChoices, _}
+import cats.instances.order._
+import org.scalacheck.Gen.const
+import org.scalacheck.{Arbitrary, Gen}
+import sandbox.Hangman.Guesses.Letter
+import sandbox.Hangman.Lives.Lives
+
+import scala.collection.immutable.SortedSet
 
 object Generators {
-  val livesGen: Gen[Lives] = Gen.oneOf(const(Lives.max), const(Lives.avg))
+  val livesGen: Gen[Lives] = Gen.oneOf(const(Lives.avg), const(Lives.max))
   implicit val arbitraryLives: Arbitrary[Lives] = Arbitrary(livesGen)
 
-  val guessesGen: Gen[Ior[NonEmptySet[Char], NonEmptySet[NonEmptyList[Char]]]] = for {
-    symbols <- Gen.nonEmptyListOf(Gen.alphaChar).map(ls => symbolChoices(NonEmptyList.fromListUnsafe(ls)))
-    words <- Gen.nonEmptyListOf(Gen.nonEmptyListOf(Gen.alphaChar)).map(ls => wordChoices(NonEmptyList.fromListUnsafe(ls.map(NonEmptyList.fromListUnsafe))))
-  } yield symbols.combine(words)
-  implicit val arbitraryGuesses: Arbitrary[Ior[NonEmptySet[Char], NonEmptySet[NonEmptyList[Char]]]] = Arbitrary(guessesGen)
+  val guessesGen: Gen[Guesses] = for {
+    letters <- Gen.option(Gen.nonEmptyListOf(Gen.alphaChar).map(letters => NonEmptySet[Letter](letters.head, SortedSet(letters.tail : _*))))
+    words <- Gen.option(Gen.nonEmptyListOf(Gen.nonEmptyListOf(Gen.alphaChar))
+      .map(words => NonEmptySet.fromSetUnsafe(SortedSet(words.map(word => NonEmptyList.fromListUnsafe(word)): _*))))
+  } yield Guesses(letters, words)
+
+  implicit val arbitraryGuesses: Arbitrary[Guesses] = Arbitrary(guessesGen)
 
   val wordGen: Gen[NonEmptyList[Char]] = Gen.nonEmptyListOf(Gen.alphaChar).map(NonEmptyList.fromListUnsafe)
   implicit val arbitraryWord: Arbitrary[NonEmptyList[Char]] = Arbitrary(wordGen)
 
-  implicit val arbitraryState: Arbitrary[State] = {
+  implicit val arbitraryState: Arbitrary[GameState] = {
     val genInit = const(Init)
 
     val genGame = for {
       lives <- livesGen
       word <- wordGen
-      guesses <- Gen.option(Gen.nonEmptyListOf(Gen.asciiChar))
-    } yield Game(lives, word, guesses.map(choices => symbolChoices(NonEmptyList.fromListUnsafe(choices))))
+      guesses <- guessesGen
+    } yield Game(lives, word, guesses)
 
     val genWin = wordGen.flatMap(word => Win(word))
 
@@ -42,7 +48,7 @@ object Generators {
     val genExit = const(ExitGame)
     val genRestart = Gen.oneOf(const(Easy), const(Medium), const(Hard)).map(Restart)
     val genGuessWord = wordGen.map(GuessWord)
-    val genGuessSymbol = Gen.asciiChar.map(GuessSymbol)
+    val genGuessSymbol = Gen.asciiChar.map(GuessLetter)
 
     Arbitrary(Gen.oneOf(genExit, genRestart, genGuessWord, genGuessSymbol))
   }
@@ -51,16 +57,16 @@ object Generators {
     Gen.oneOf(const(Easy), const(Medium), const(Hard))
   )
 
-  val arbitraryWordWithNonMatchingSymbol: Arbitrary[(NonEmptyList[Char], Char)] = Arbitrary(for {
-    symbol <- Gen.numChar
+  val arbitraryWordWithNonMatchingLetter: Arbitrary[(NonEmptyList[Char], Letter)] = Arbitrary(for {
+    letter <- Gen.numChar
     word <- wordGen
-    if !word.toNes.contains(symbol)
-  } yield (word, symbol))
+    if !word.toNes.contains(letter)
+  } yield (word, letter))
 
-  val arbitraryWordWithMatchingSymbol: Arbitrary[(NonEmptyList[Char], Char)] = Arbitrary(for {
-    symbol <- Gen.alphaChar
+  val arbitraryWordWithMatchingLetter: Arbitrary[(NonEmptyList[Char], Letter)] = Arbitrary(for {
+    letter <- Gen.alphaChar
     word <- wordGen
-  } yield (symbol :: word, symbol))
+  } yield (letter :: word, letter))
 
   def unEvenPair[T: Arbitrary]: Arbitrary[(T, T)] = Arbitrary(Arbitrary.arbitrary[(T, T)].suchThat(tp => tp._1 != tp._2))
 

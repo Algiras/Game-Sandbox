@@ -1,14 +1,12 @@
 package sandbox.TicTacToe
 
-import cats.data.StateT
-import cats.effect.ExitCode
 import cats.instances.either._
-import cats.syntax.either._
 import org.specs2.mutable.Specification
+import sandbox.TestCase
+import sandbox.TestCase._
 import sandbox.TicTacToe.coordinates.CoordinateSpec._
 import sandbox.TicTacToe.game.GameSpec.buildGameUnsafe
 import sandbox.TicTacToe.game.{Game, Move}
-import sandbox.typeClasses.Console
 
 class TicTacToeSpec extends Specification {
   "Display Game in Console format" >> {
@@ -66,30 +64,4 @@ class TicTacToeSpec extends Specification {
     Text.nextMove(square),
     Text.validInputs
   )
-
-  val completedProgram = (TestCase(Seq.empty, Seq.empty), ExitCode.Success)
-
-  case class TestCase(inputs: Seq[String], outputs: Seq[String])
-
-  type TestState[A] = StateT[Either[String, ?], TestCase, A]
-
-  def tesState[A](fn: TestCase => Either[String, (TestCase, A)]): StateT[Either[String, ?], TestCase, A] = StateT[Either[String, ?], TestCase, A](fn)
-
-  implicit val stateInstance: Console[TestState] = new Console[TestState] {
-    override def readLine: TestState[String] = tesState(state => {
-      state.inputs.headOption.toRight("No matching input left").flatMap(firstInput =>
-        (TestCase(state.inputs.tail, state.outputs), firstInput).asRight
-      )
-    })
-
-    override def printLine(text: String): TestState[Unit] = tesState(state => {
-      state.outputs.headOption.toRight("No matching output left").flatMap(firstOutput => {
-        if (firstOutput == text) {
-          (TestCase(state.inputs, state.outputs.tail), ()).asRight
-        } else {
-          s"Output is not valid: expected '$firstOutput' actual '$text'".asLeft
-        }
-      })
-    })
-  }
 }

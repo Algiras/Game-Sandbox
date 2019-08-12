@@ -1,9 +1,12 @@
 package sandbox.Hangman
 
-import cats.data.NonEmptyList
+import sandbox.Hangman.Guesses.Word
 
 trait WordService[F[_]] {
-  def getWord: F[NonEmptyList[Char]]
+  def getWord: F[Word]
 }
 
+object WordService {
+  def apply[F[_]](implicit ev: WordService[F]): WordService[F] = ev
+}
 

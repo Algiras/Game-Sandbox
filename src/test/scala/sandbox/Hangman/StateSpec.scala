@@ -1,35 +1,39 @@
 package sandbox.Hangman
 
-import cats.data.NonEmptyList
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
-import sandbox.Hangman.State._
+import sandbox.Hangman.GameState._
 import sandbox.typeClasses.Encoder
+import cats.data.{NonEmptyList, NonEmptySet}
+import cats.instances.char._
+import sandbox.Hangman.Lives.Lives
 
 class StateSpec extends Specification with ScalaCheck {
+  val emptyGame: String = emptyGameScene.map(_.mkString("")).mkString("\n")
   def wordFromString(value: String): NonEmptyList[Char] = NonEmptyList.fromListUnsafe(value.toList)
 
   "State" should {
     "encode" >> {
       "Win" >> {
         val word = "magic"
-        Encoder[State].encode(Win(wordFromString(word))) must beMatching(s".*$word.*")
+        Encoder[GameState].encode(Win(wordFromString(word))) must beMatching(s".*$word.*")
       }
 
       "Lose" >> {
         val word = "magic"
-        val guesses = symbolChoices(NonEmptyList.of('m', 'a', 'g'))
+        val guesses = List('a', 'g').foldLeft(Guesses('m')){ case (gs, s) => gs.copy(letters = gs.letters.map(_.add(s)))}
 
-        Encoder[State].encode(Lose(wordFromString(word), guesses)) must beMatching(s".*$word.*a, g, m.*")
+        Encoder[GameState].encode(Lose(wordFromString(word), guesses)) must beMatching(s".*$word.*a, g, m.*")
       }
 
       "Game" >> {
         "with choices" >> {
-          val choices = addWordGuess(
-            symbolChoices(NonEmptyList.of('m', 'a', 'g', 'd')),
-            NonEmptyList.fromListUnsafe("word".toList)
+          val choices = Guesses(
+            Some(NonEmptySet.of('m', 'a', 'g', 'd')),
+            Some(NonEmptySet.of(NonEmptyList.fromListUnsafe("word".toList)))
           )
-          Encoder[State].encode(Game(Lives.max, wordFromString("magic"), Some(choices))).split('\n') must_=== emptyGame.split('\n') ++ Array(
+
+          Encoder[GameState].encode(Game(Lives.max, wordFromString("magic"), choices)).split('\n') must_=== emptyGame.split('\n') ++ Array(
             "word: m a g _ _",
             "choices: a, d, g, m, word",
             s"lives: ${Lives.MAX}"
@@ -37,8 +41,9 @@ class StateSpec extends Specification with ScalaCheck {
         }
 
         "with no choices" >> {
-          Encoder[State].encode(Game(Lives.max, wordFromString("magic"), None)).split('\n') must_=== emptyGame.split('\n') ++ Array(
+          Encoder[GameState].encode(Game(Lives.max, wordFromString("magic"), Guesses.empty)).split('\n') must_=== emptyGame.split('\n') ++ Array(
             "word: _ _ _ _ _",
+            "choices: No guesses yet",
             s"lives: ${Lives.MAX}"
           )
         }
@@ -51,8 +56,10 @@ class StateSpec extends Specification with ScalaCheck {
 
               lines.map(_.padTo(maxLength, " ").mkString("")).mkString("\n")
             }
+            def subtractLives(subtract: Int): Lives =
+              Range(1, subtract + 1).foldLeft(Option(Lives.max))((lf, _) => lf.flatMap(Lives.sub)).get
 
-            (Encoder[Lives].encode(Lives(Lives.MAX - 1)) must_===
+            (Encoder[Lives].encode(subtractLives(1)) must_===
               buildStr(
                 """
                   ||_________
@@ -62,7 +69,7 @@ class StateSpec extends Specification with ScalaCheck {
                   ||
                   ||
                   ||
-                  ||_________""")).and(Encoder[Lives].encode(Lives(Lives.MAX - 2)) must_===
+                  ||_________""")).and(Encoder[Lives].encode(subtractLives(2)) must_===
               buildStr(
                 """
                   ||_________
@@ -72,7 +79,7 @@ class StateSpec extends Specification with ScalaCheck {
                   ||
                   ||
                   ||
-                  ||_________""")).and(Encoder[Lives].encode(Lives(Lives.MAX - 3)) must_===
+                  ||_________""")).and(Encoder[Lives].encode(subtractLives(3)) must_===
               buildStr(
                 """
                   ||_________
@@ -82,7 +89,7 @@ class StateSpec extends Specification with ScalaCheck {
                   ||
                   ||
                   ||
-                  ||_________""")).and(Encoder[Lives].encode(Lives(Lives.MAX - 4)) must_===
+                  ||_________""")).and(Encoder[Lives].encode(subtractLives(4)) must_===
               buildStr(
                 """
                   ||_________
@@ -92,27 +99,17 @@ class StateSpec extends Specification with ScalaCheck {
                   ||
                   ||
                   ||
-                  ||_________""")).and(Encoder[Lives].encode(Lives(Lives.MAX - 1)) must_===
-              buildStr(
-                """
-                  ||_________
-                  ||/      |
-                  ||
-                  ||
-                  ||
-                  ||
-                  ||
-                  ||_________""")).and(Encoder[Lives].encode(Lives(Lives.MAX - 5)) must_===
+                  ||_________""")).and(Encoder[Lives].encode(subtractLives(5)) must_===
               buildStr(
                 """
                   ||_________
                   ||/      |
                   ||      (_)
-                  ||       |
+                  ||      /
                   ||
                   ||
                   ||
-                  ||_________""")).and(Encoder[Lives].encode(Lives(Lives.MAX - 6)) must_===
+                  ||_________""")).and(Encoder[Lives].encode(subtractLives(6)) must_===
               buildStr(
                 """
                   ||_________
@@ -122,7 +119,7 @@ class StateSpec extends Specification with ScalaCheck {
                   ||
                   ||
                   ||
-                  ||_________""")).and(Encoder[Lives].encode(Lives(Lives.MAX - 7)) must_===
+                  ||_________""")).and(Encoder[Lives].encode(subtractLives(7)) must_===
               buildStr(
                 """
                   ||_________
@@ -132,7 +129,7 @@ class StateSpec extends Specification with ScalaCheck {
                   ||
                   ||
                   ||
-                  ||_________""")).and(Encoder[Lives].encode(Lives(Lives.MAX - 8)) must_===
+                  ||_________""")).and(Encoder[Lives].encode(subtractLives(8)) must_===
               buildStr(
                 """
                   ||_________
@@ -142,7 +139,7 @@ class StateSpec extends Specification with ScalaCheck {
                   ||       |
                   ||
                   ||
-                  ||_________""")).and(Encoder[Lives].encode(Lives(Lives.MAX - 9)) must_===
+                  ||_________""")).and(Encoder[Lives].encode(subtractLives(9)) must_===
               buildStr(
                 """
                   ||_________
@@ -151,16 +148,6 @@ class StateSpec extends Specification with ScalaCheck {
                   ||      /|\
                   ||       |
                   ||      /
-                  ||
-                  ||_________""")).and(Encoder[Lives].encode(Lives(Lives.MAX - 10)) must_===
-              buildStr(
-                """
-                  ||_________
-                  ||/      |
-                  ||      (_)
-                  ||      /|\
-                  ||       |
-                  ||      / \
                   ||
                   ||_________"""))
           }

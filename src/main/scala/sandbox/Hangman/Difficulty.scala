@@ -1,5 +1,6 @@
 package sandbox.Hangman
 
+import sandbox.Hangman.Lives.Lives
 import sandbox.typeClasses.{Decoder, Encoder}
 import sandbox.typeClasses.Encoder._
 
@@ -26,5 +27,6 @@ object Difficulty {
     case Hard => "hard"
   }
 
-  implicit val difficultyDecoder: Decoder[Difficulty] = (value: String) => List[Difficulty](Easy, Medium, Hard).find(_.encode == value)
+  implicit val difficultyDecoder: Decoder[Difficulty] = (value: String) =>
+    List[Difficulty](Easy, Medium, Hard).find(_.encode == value)
 }

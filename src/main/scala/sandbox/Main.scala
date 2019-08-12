@@ -9,8 +9,7 @@ import sandbox.typeClasses.Console
 import scala.util.Random
 
 object Main extends IOApp {
-
-  case object ApiWordService extends WordService[IO] {
+  implicit val wordServiceIO: WordService[IO] = new WordService[IO]{
     override def getWord: IO[NonEmptyList[Char]] = for {
       wordApiResponse <- IO(sttp.get(uri"https://raw.githubusercontent.com/dwyl/english-words/master/words.txt").send())
       words <- (wordApiResponse.body match {
@@ -32,15 +31,15 @@ object Main extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
     val ticTacToe = TicTacToe.run[IO]
-    val hangman = Hangman.run[IO] _
+    val hangman = Hangman.run[IO]
 
     for {
       _ <- ioInstance.printLine("Available options: ticTacToe, hangMan")
       name <- ioInstance.readLine
       exit <- name match {
         case "ticTacToe" => ticTacToe
-        case "hangMan" => hangman(ApiWordService)
-        case _ => IO(ExitCode.Success)
+        case "hangMan" => hangman
+        case _ => IO(ExitCode.Error)
       }
     } yield exit
   }
